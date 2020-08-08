@@ -5,6 +5,7 @@
     "auth-s3-static": "bin/auth-s3-static.js"
   },
   "scripts": {
+    "deploy": "cdk deploy",
     "pretest": "tsc --noEmit",
     "test": "ava"
   },
@@ -19,8 +20,10 @@
     "@aws-cdk/aws-cloudfront": "1.57.0",
     "@aws-cdk/aws-cloudfront-origins": "1.57.0",
     "@aws-cdk/aws-iam": "1.57.0",
+    "@aws-cdk/aws-lambda": "^1.57.0",
     "@aws-cdk/aws-s3": "1.57.0",
     "@aws-cdk/core": "1.57.0",
-    "ava": "^3.11.1"
+    "ava": "^3.11.1",
+    "aws-sdk": "^2.729.0"
   }
 }

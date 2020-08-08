@@ -1,4 +1,4 @@
-import { expect, haveResource, haveResourceLike } from '@aws-cdk/assert';
+import { expect, haveResourceLike } from '@aws-cdk/assert';
 import * as cdk from '@aws-cdk/core';
 import { NeuronDistributionStack } from '../lib/neuron-distribution';
 import test from 'ava';
@@ -13,11 +13,17 @@ test('originAccessIdentity', (t) => {
 test('distribution', (t) => {
   const app = new cdk.App();
   const stack = new NeuronDistributionStack(app, 'MyTestStack');
+  
   expect(stack).to(haveResourceLike("AWS::CloudFront::Distribution", {
     "DistributionConfig": {
       "DefaultCacheBehavior": {
         "TargetOriginId": "origin1",
-        "ViewerProtocolPolicy": "redirect-to-https"
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "LambdaFunctionAssociations": [
+          {
+            "EventType": "viewer-request"
+          }
+        ]
       },
       "DefaultRootObject": "index.html",
       "HttpVersion": "http2",
@@ -96,3 +102,17 @@ test('bucketPolicy', (t) => {
   t.pass();
 });
 
+test('authenticationFunction', (t) => {
+  const app = new cdk.App();
+  const stack = new NeuronDistributionStack(app, 'MyTestStack');
+
+  expect(stack).to(haveResourceLike("AWS::Lambda::Function", {
+    "Runtime": "nodejs12.x"
+  }));
+  expect(stack).to(haveResourceLike("AWS::Lambda::Version", {
+    "FunctionName": {
+      "Ref": "authenticationFunction07DF20D0"
+    }
+  }));
+  t.pass();
+});

@@ -2,7 +2,9 @@ import * as s3 from '@aws-cdk/aws-s3';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
 import * as iam from '@aws-cdk/aws-iam';
 import * as cdk from '@aws-cdk/core';
-import { BucketPolicy } from '@aws-cdk/aws-s3';
+import * as lambda from '@aws-cdk/aws-lambda';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class NeuronDistributionStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -14,12 +16,22 @@ export class NeuronDistributionStack extends cdk.Stack {
       comment: 'neuron-distribution'
     })
 
+    const authenticationFunction = new lambda.Function(this, 'authenticationFunction', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromInline(fs.readFileSync(path.join(__dirname, 'function/index.js'), 'utf-8')),
+    })
+
     new cloudfront.CloudFrontWebDistribution(this, 'distribution', {
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
       httpVersion: cloudfront.HttpVersion.HTTP2,
       originConfigs: [{
-        behaviors: [{ 
-          isDefaultBehavior: true
+        behaviors: [{
+          isDefaultBehavior: true,
+          lambdaFunctionAssociations: [{
+            eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+            lambdaFunction: authenticationFunction.currentVersion
+          }]
         }],
         s3OriginSource: {
           s3BucketSource: s3.Bucket.fromBucketAttributes(this, 'bucketSource', {
@@ -31,7 +43,7 @@ export class NeuronDistributionStack extends cdk.Stack {
       }]
     })
 
-    const bucketPolicy = new BucketPolicy(this, 'bucketPolicy', {
+    const bucketPolicy = new s3.BucketPolicy(this, 'bucketPolicy', {
       bucket
     });
     bucketPolicy.document.addStatements(new iam.PolicyStatement({
