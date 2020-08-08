@@ -1,0 +1,26 @@
+{
+  "name": "auth-s3-static",
+  "version": "0.1.0",
+  "bin": {
+    "auth-s3-static": "bin/auth-s3-static.js"
+  },
+  "scripts": {
+    "pretest": "tsc --noEmit",
+    "test": "ava"
+  },
+  "devDependencies": {
+    "aws-cdk": "1.57.0",
+    "@aws-cdk/assert": "1.57.0",
+    "@types/node": "^14.0.27",
+    "ts-node": "^8.10.2",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-cloudfront": "1.57.0",
+    "@aws-cdk/aws-cloudfront-origins": "1.57.0",
+    "@aws-cdk/aws-iam": "1.57.0",
+    "@aws-cdk/aws-s3": "1.57.0",
+    "@aws-cdk/core": "1.57.0",
+    "ava": "^3.11.1"
+  }
+}
