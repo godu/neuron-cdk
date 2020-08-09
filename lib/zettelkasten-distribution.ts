@@ -6,14 +6,14 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export class NeuronDistributionStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+export class ZettelkastenDistributionStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: {bucketName: string} & cdk.StackProps) {
     super(scope, id, props);
 
-    const bucket = s3.Bucket.fromBucketName(this, 'bucket', 'zettelkasten-godu');
+    const bucket = s3.Bucket.fromBucketName(this, 'bucket', props.bucketName);
 
     const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'originAccessIdentity', {
-      comment: 'neuron-distribution'
+      comment: 'zettelkasten-distribution'
     })
 
     const authenticationFunction = new lambda.Function(this, 'authenticationFunction', {
@@ -35,8 +35,8 @@ export class NeuronDistributionStack extends cdk.Stack {
         }],
         s3OriginSource: {
           s3BucketSource: s3.Bucket.fromBucketAttributes(this, 'bucketSource', {
-            bucketArn: "arn:aws:s3:::zettelkasten-godu",
-            bucketRegionalDomainName: `zettelkasten-godu.s3.eu-west-1.${cdk.Stack.of(this).urlSuffix}`
+            bucketArn: `arn:aws:s3:::${props.bucketName}`,
+            bucketRegionalDomainName: `${props.bucketName}.s3.eu-west-1.${cdk.Stack.of(this).urlSuffix}`
           }),
           originAccessIdentity
         },
